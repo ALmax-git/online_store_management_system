@@ -11,7 +11,7 @@ require_once './classes/Product.php';
 $Database = new Database;
 $product = new Product($Database->getConnection());
 $products = $product->all();
-
+$count = 0;
 if(isset($_POST['create_product'])){
     $item = new Product($Database->getConnection());
     $item = $item->create($_POST['name'], $_POST['description'], $_POST['price'], $_POST['brand'], $_POST['quantity']);
@@ -79,12 +79,12 @@ if(isset($_POST['create_product'])){
                     <tbody>
                         <?php foreach($products as $item): ?>
                         <tr>
-                            <th scope="row">1</th>
-                            <td><?php echo $item['name']?></td>
-                            <td><?php echo $item['brand']?></td>
-                            <td><?php echo $item['price']?></td>
-                            <td><?php echo $item['quantity']?></td>
-                            <td><?php echo $item['description']?></td>
+                            <th scope="row"><?php echo ++$count ;?></th>
+                            <td><?php echo $item['name']; ?></td>
+                            <td><?php echo $item['brand']; ?></td>
+                            <td><?php echo $item['price']; ?></td>
+                            <td><?php echo $item['quantity']; ?></td>
+                            <td><?php echo $item['description']; ?></td>
                         </tr>
                         <?php endforeach; ?>
                     </tbody>
