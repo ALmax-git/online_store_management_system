@@ -65,28 +65,30 @@ if(isset($_POST['create_product'])){
                         </form>
                     </div>
                 </div>
-                <table class="table">
-                    <thead>
-                        <tr>
-                        <th scope="col">#</th>
-                        <th scope="col">Name</th>
-                        <th scope="col">Brand</th>
-                        <th scope="col">Price</th>
-                        <th scope="col">Quantity</th>
-                        <th scope="col">Description</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <?php foreach($products as $item): ?>
-                        <tr>
-                            <th scope="row"><?php echo ++$count ;?></th>
-                            <td><?php echo $item['name']; ?></td>
-                            <td><?php echo $item['brand']; ?></td>
-                            <td><?php echo $item['price']; ?></td>
-                            <td><?php echo $item['quantity']; ?></td>
-                            <td><?php echo $item['description']; ?></td>
-                        </tr>
-                        <?php endforeach; ?>
-                    </tbody>
-                </table>
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                            <th scope="col">#</th>
+                            <th scope="col">Name</th>
+                            <th scope="col">Brand</th>
+                            <th scope="col">Price</th>
+                            <th scope="col">Quantity</th>
+                            <th scope="col">Description</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php foreach($products as $item): ?>
+                            <tr>
+                                <th scope="row"><?php echo ++$count ;?></th>
+                                <td><?php echo $item['name']; ?></td>
+                                <td><?php echo $item['brand']; ?></td>
+                                <td><?php echo $item['price']; ?></td>
+                                <td><?php echo $item['quantity']; ?></td>
+                                <td><?php echo $item['description']; ?></td>
+                            </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
             </div>
