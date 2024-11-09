@@ -26,7 +26,6 @@ if (isset($_POST['login'])) {
     if (!$username || !$password) {
         $_SESSION['error'] = "O'Oh! Username or password not set";
     } else {
-        // Select both id and password for login verification
         $new_user = "SELECT id, password FROM users WHERE username = ?";
         $stmt = $connection->prepare($new_user);
         $stmt->bind_param("s", $username);
@@ -38,7 +37,6 @@ if (isset($_POST['login'])) {
                 $stmt->fetch();
 
                 if (password_verify($password, $hashed_password)) {
-                    // Store id and username in the session
                     $_SESSION['auth']['auth'] = true;
                     $_SESSION['auth']['id'] = $user_id;
                     $_SESSION['auth']['username'] = $username;
@@ -57,34 +55,44 @@ if (isset($_POST['login'])) {
     }
 }
 
-if (isset($_POST['register'])) {
+elseif (isset($_POST['register'])) {
     $username = $_POST['username'] ?? null;
     $password = $_POST['password'] ?? null;
-    $comfirm_password = $_POST['comfirm_password'] ?? null;
+    $confirm_password = $_POST['confirm_password'] ?? null;
 
-    if (($username == null) || ($password == null) || ($comfirm_password == null)) {
-        print_r([$_POST]);
-        $_SESSION['error'] = "O'Oh! Username or password error";
+    if (!$username || !$password || !$confirm_password) {
+        $_SESSION['error'] = "O'Oh! Username or password not set";
     } else {
-        if ($comfirm_password == $password) {
-            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-            $new_user = "INSERT INTO users (username, password) VALUES (?, ?)";
-            $stmt = $connection->prepare($new_user);
-            $stmt->bind_param("ss", $username, $hashed_password);
+        if ($confirm_password != $password) {
+            $_SESSION['error'] = "O'Oh! confirm password and password do not match";
+        } else {
+            // Check if the username already exists
+            $check_user = "SELECT id FROM users WHERE username = ?";
+            $stmt = $connection->prepare($check_user);
+            $stmt->bind_param("s", $username);
+            $stmt->execute();
+            $stmt->store_result();
 
-            if ($stmt->execute()) {
-                // After successful registration, store id and username in session
-                $_SESSION['auth']['auth'] = true;
-                $_SESSION['auth']['id'] = $stmt->insert_id;
-                $_SESSION['auth']['username'] = $username;
-                header('location: ./');
-                exit();
+            if ($stmt->num_rows > 0) {
+                $_SESSION['error'] = "Username already exists. Please choose a different one.";
             } else {
-                $_SESSION['error'] = "Registration unsuccessful!";
+                // Hash the password before storing it
+                $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+                $new_user = "INSERT INTO users (username, password) VALUES (?, ?)";
+                $stmt = $connection->prepare($new_user);
+                $stmt->bind_param("ss", $username, $hashed_password);
+
+                if ($stmt->execute()) {
+                    $_SESSION['auth']['auth'] = true;
+                    $_SESSION['auth']['id'] = $stmt->insert_id;
+                    $_SESSION['auth']['username'] = $username;
+                    header('location: ./');
+                    exit();
+                } else {
+                    $_SESSION['error'] = "Registration unsuccessful!";
+                }
             }
             $stmt->close();
-        } else {
-            $_SESSION['error'] = "O'Oh! confirm password and password do not match";
         }
     }
 }
@@ -135,7 +143,7 @@ $connection->close();
                     </label>
                     <label class="form-label-wrapper">
                         <p class="form-label">Comfirm Password</p>
-                        <input type="password" class="form-input" name="comfirm_password">
+                        <input type="password" class="form-input" name="confirm_password">
                     </label>
                     <input type="submit" name="register" class="form-btn primary-default-btn transparent-btn" value="submit">
                     <a href="./auth.php?auth=login">I have Account</a>
