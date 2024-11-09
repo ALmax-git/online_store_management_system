@@ -14,6 +14,7 @@ if (!$connection) {
 if (!isset($_SESSION['auth']) || !is_array($_SESSION['auth'])) {
     $_SESSION['auth'] = [];
 }
+if ($_SESSION['auth']['auth']) {header('location: ./?web');}
 if (isset($_POST['login'])) {
     $username = $_POST['username'] ?? null;
     $password = $_POST['password'] ?? null;
@@ -52,24 +53,29 @@ if (isset($_POST['login'])) {
 elseif (isset($_POST['register'])) {
     $username = $_POST['username'] ?? null;
     $password = $_POST['password'] ?? null;
+    $comfirm_password = $_POST['comfirm_password'] ?? null;
 
-    if (!$username || !$password) {
+    if (!$username || !$password || !$comfirm_password) {
         $_SESSION['error'] = "O'Oh! Username or password not set";
     } else {
-        // Hash the password before storing it
-        $hashed_password = password_hash($password, PASSWORD_BCRYPT);
+        if ($comfirm_password == $password){
+            // Hash the password before storing it
+            $hashed_password = password_hash($password, PASSWORD_BCRYPT);
 
-        $new_user = "INSERT INTO users (username, password) VALUES (?, ?)";
-        $stmt = $connection->prepare($new_user);
-        $stmt->bind_param("ss", $username, $hashed_password);
+            $new_user = "INSERT INTO users (username, password) VALUES (?, ?)";
+            $stmt = $connection->prepare($new_user);
+            $stmt->bind_param("ss", $username, $hashed_password);
 
-        if ($stmt->execute()) {
-            $_SESSION['auth']['auth'] = true;
-            $_SESSION['auth']['name'] = $username;
-            header('location: ./');
-            exit();
+            if ($stmt->execute()) {
+                $_SESSION['auth']['auth'] = true;
+                $_SESSION['auth']['name'] = $username;
+                header('location: ./');
+                exit();
+            } else {
+                $_SESSION['error'] = "Registration unsuccessful!";
+            }
         } else {
-            $_SESSION['error'] = "Registration unsuccessful!";
+            $_SESSION['error'] = "O'Oh! comfirm password or password not the same";
         }
     }
 }
@@ -89,7 +95,7 @@ elseif (isset($_POST['register'])) {
     <main class="page-center">
         <article class="sign-up">
             <h1 class="sign-up__title">Welcome</h1>
-            <p class="sign-up__subtitle"><?php echo ($_SESSION['error'] ?? "Online Store Management System"); unset($_SESSION['error']); ?></p>
+            <p class="sign-up__subtitle" style="color:<?php echo isset($_SESSION['error']) ? 'red' : '';?>;"><?php echo ($_SESSION['error'] ?? "Online Store Management System"); unset($_SESSION['error']); ?></p>
             <?php if ($_GET['auth'] == "login" || !isset($_GET['auth'])): ?>
                 <form class="sign-up-form form" method="post" action="auth.php">
                     <h1 class="sign-up__title">Login</h1>
@@ -114,6 +120,10 @@ elseif (isset($_POST['register'])) {
                     <label class="form-label-wrapper">
                         <p class="form-label">Password</p>
                         <input type="password" class="form-input" name="password">
+                    </label>
+                    <label class="form-label-wrapper">
+                        <p class="form-label">Comfirm Password</p>
+                        <input type="password" class="form-input" name="comfirm_password">
                     </label>
                     <input type="submit" name="register" class="form-btn primary-default-btn transparent-btn" value="submit">
                     <a href="./auth.php?auth=login">I have Account</a>
