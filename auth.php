@@ -1,20 +1,24 @@
 <?php
-// include "./debugger.php";
 session_start();
 $server = "localhost";
 $user = "root";
 $passwd = '';
 $db = "o_s_m_s";
 
-$connection = mysqli_connect($server, $user, $passwd,  $db);
-
+$connection = mysqli_connect($server, $user, $passwd, $db);
 if (!$connection) {
     die("Oops, connection failed!");
 }
+
 if (!isset($_SESSION['auth']) || !is_array($_SESSION['auth'])) {
     $_SESSION['auth'] = [];
 }
-if ($_SESSION['auth']['auth']) {header('location: ./?web');}
+
+if (!empty($_SESSION['auth']['auth'])) {
+    header('location: ./?web');
+    exit();
+}
+
 if (isset($_POST['login'])) {
     $username = $_POST['username'] ?? null;
     $password = $_POST['password'] ?? null;
@@ -22,20 +26,22 @@ if (isset($_POST['login'])) {
     if (!$username || !$password) {
         $_SESSION['error'] = "O'Oh! Username or password not set";
     } else {
-        $new_user = "SELECT password FROM users WHERE username = ?";
+        // Select both id and password for login verification
+        $new_user = "SELECT id, password FROM users WHERE username = ?";
         $stmt = $connection->prepare($new_user);
         $stmt->bind_param("s", $username);
 
         if ($stmt->execute()) {
             $stmt->store_result();
             if ($stmt->num_rows > 0) {
-                $stmt->bind_result($hashed_password);
+                $stmt->bind_result($user_id, $hashed_password);
                 $stmt->fetch();
 
-                // Verify the entered password against the stored hash
                 if (password_verify($password, $hashed_password)) {
+                    // Store id and username in the session
                     $_SESSION['auth']['auth'] = true;
-                    $_SESSION['auth']['name'] = $username;
+                    $_SESSION['auth']['id'] = $user_id;
+                    $_SESSION['auth']['username'] = $username;
                     header('location: ./');
                     exit();
                 } else {
@@ -47,39 +53,45 @@ if (isset($_POST['login'])) {
         } else {
             $_SESSION['error'] = "Error executing query.";
         }
+        $stmt->close();
     }
 }
 
-elseif (isset($_POST['register'])) {
+if (isset($_POST['register'])) {
     $username = $_POST['username'] ?? null;
     $password = $_POST['password'] ?? null;
     $comfirm_password = $_POST['comfirm_password'] ?? null;
 
-    if (!$username || !$password || !$comfirm_password) {
-        $_SESSION['error'] = "O'Oh! Username or password not set";
+    if (($username == null) || ($password == null) || ($comfirm_password == null)) {
+        print_r([$_POST]);
+        $_SESSION['error'] = "O'Oh! Username or password error";
     } else {
-        if ($comfirm_password == $password){
-            // Hash the password before storing it
+        if ($comfirm_password == $password) {
             $hashed_password = password_hash($password, PASSWORD_BCRYPT);
-
             $new_user = "INSERT INTO users (username, password) VALUES (?, ?)";
             $stmt = $connection->prepare($new_user);
             $stmt->bind_param("ss", $username, $hashed_password);
 
             if ($stmt->execute()) {
+                // After successful registration, store id and username in session
                 $_SESSION['auth']['auth'] = true;
-                $_SESSION['auth']['name'] = $username;
+                $_SESSION['auth']['id'] = $stmt->insert_id;
+                $_SESSION['auth']['username'] = $username;
                 header('location: ./');
                 exit();
             } else {
                 $_SESSION['error'] = "Registration unsuccessful!";
             }
+            $stmt->close();
         } else {
-            $_SESSION['error'] = "O'Oh! comfirm password or password not the same";
+            $_SESSION['error'] = "O'Oh! confirm password and password do not match";
         }
     }
 }
+
+$connection->close();
 ?>
+
 
 <!DOCTYPE html>
 <html lang="en">
