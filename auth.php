@@ -1,5 +1,6 @@
 <?php
 session_start();
+// include './debugger.php';
 $server = "localhost";
 $user = "root";
 $passwd = '';

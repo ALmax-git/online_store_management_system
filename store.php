@@ -6,30 +6,44 @@ require_once './classes/User.php';
 
 $database = new Database();
 $user = new User($Database->getConnection());
+
 if (!$_SESSION['auth']['auth']) {header('location: ./auth.php');}
+
 $user = $user->find($_SESSION['auth']['id']) ?? '';
+
 $store = new Store($database->getConnection());
-
-if(isset($_POST['save_store'])){
-  // print_r($_POST[]);
-  $store->name = $_POST['name'];
-  $store->email = $_POST['email'];
-  $store->number_staff = $_POST['number_staff'];
-  $store->type = $_POST['type'];
-  $store->location = $_POST['location'];
-  $store->user_id = $_SESSION['auth']['id'];
-
-  if(isset($user->store_id) && $user->store_id != null) {
-    $store->update($user->store_id);
-  }else{
-    $store->create();
-  }
-  $store_id =Array($store);
-
-  print_r($store_id['insert_id']);
-  $user->store_id = $store_id->insert_id;
-  $user->update($_SESSION['auth']['id']);
+if(isset($user->store_id)){
+  $store->find($user->store_id);
 }
+if (isset($_POST['save_store'])) {
+    // Assign form data to store object properties
+    $store->name = $_POST['name'];
+    $store->email = $_POST['email'];
+    $store->number_staff = $_POST['number_staff'];
+    $store->type = $_POST['type'];
+    $store->location = $_POST['location'];
+    $store->user_id = $_SESSION['auth']['id'];
+
+    if (isset($user) && is_object($user)) {
+        if (isset($user->store_id) && $user->store_id != null) {
+            $store->update($user->store_id);
+        } else {
+            $store_id = $store->create();
+            if ($store_id !== false) {  // Check if create() was successful
+                $manager = new User($Database->getConnection());
+                $manager->store_id = $store_id;
+                print_r($manager->store_id);
+                $manager->name = "ALmax";
+                $manager->update($_SESSION['auth']['id']);
+            } else {
+                echo "Error saving store."; // Display an error message if the insertion failed
+            }
+        }
+    } else {
+        echo "Error: User object not initialized.";
+    }
+}
+
 
 ?>
 
