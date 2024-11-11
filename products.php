@@ -7,18 +7,34 @@ error_reporting(E_ALL);
 include './debugger.php';
 require_once './classes/Database.php';
 require_once './classes/Product.php';
+require_once './classes/Store.php';
+require_once './classes/User.php';
 
-$Database = new Database;
-$product = new Product($Database->getConnection());
+$database = new Database;
+$product = new Product($database->getConnection());
 $products = $product->all();
 $count = 0;
+
+$user = new User($database->getConnection());
+
+if (!$_SESSION['auth']['auth']) {header('location: ./auth.php');}
+
+$user = $user->find($_SESSION['auth']['id']) ?? '';
+
+$store = new Store($database->getConnection());
 if(isset($_POST['create_product'])){
-    $item = new Product($Database->getConnection());
-    $item = $item->create($_POST['name'], $_POST['description'], $_POST['price'], $_POST['brand'], $_POST['quantity']);
+    $item = new Product($database->getConnection());
+    if(isset($user->store_id)){
+        $store->find($user->store_id);
+    }else{
+        header('location: ./?web=store');
+        exit;
+    }
+    $item = $item->create($_POST['name'], $_POST['description'], $_POST['price'], $_POST['brand'], $_POST['quantity'], $store);
     $products = $product->all();
 }
 if(isset($_POST['delete_product'])){
-    $item = new Product($Database->getConnection());
+    $item = new Product($database->getConnection());
     $item = $item->delete($_POST['item_id']);
     $products = $product->all();
 }
@@ -91,7 +107,7 @@ if(isset($_POST['delete_product'])){
                                 <td><?php echo $item['name']; ?></td>
                                 <td><?php echo $item['brand']; ?></td>
                                 <td><?php echo $item['price']; ?></td>
-                                <td><?php echo $item['quantity']; ?></td>
+                                <td><?php echo $item['stock']; ?></td>
                                 <td>
                                     <form method="post" class="btn">
                                         <input type="hidden" value="<?php echo $item['id']; ?>" name="item_id" />

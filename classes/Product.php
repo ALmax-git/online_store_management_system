@@ -6,12 +6,17 @@ class Product {
         $this->connection = $connection;
     }
 
-    // Create and store product
-    public function create($name, $description, $price, $stock, $category_id) {
-        $stmt = $this->connection->prepare("INSERT INTO product (name, description, price, brand, quantity) VALUES (?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssdii", $name, $description, $price, $stock, $category_id);
+   public function create($name, $description, $price, $stock, $quantity, $store) {
+        // Ensure that $store is a Store object and get its ID
+        $store_id =  $store;
+
+        // Prepare and bind parameters, with store_id as an integer
+        $stmt = $this->connection->prepare("INSERT INTO product (name, description, price, brand, stock, store_id) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssdssi", $name, $description, $price, $stock, $quantity, $store_id);
+
         return $stmt->execute();
     }
+
 
     // Find product by ID
     public function find($id) {
