@@ -30,7 +30,7 @@ if(isset($_POST['place_order'])){
 
     <?php foreach($products as $item): ?>
         <div class="col">
-            <form method="POST" class="card" style="margin:auto; padding:4px;">
+            <form method="POST" class="card"  style="margin:auto; padding:30px;  margin-bottom:35px;">
                 <h1><?php echo $item['name']; ?></h1>
                 <h4><?php echo $item['brand']; ?></h4>
                 <h2>₦ <?php echo $item['price']; ?></h2>
