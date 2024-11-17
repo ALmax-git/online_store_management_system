@@ -16,12 +16,12 @@ if(isset($_POST['create_product'])){
 
 <div class="card" id="create_product_model">
                 <!-- Button trigger modal -->
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                <!--<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 Create New Product
-                </button>
+                </button>-->
                 <hr>
                 <!-- Modal -->
-                <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <!--<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div class="modal-dialog">
                         <form method="post" class="modal-content">
                             <div class="modal-header">
@@ -59,7 +59,7 @@ if(isset($_POST['create_product'])){
                             </div>
                         </form>
                     </div>
-                </div>
+                </div>-->
                 <div class="table-responsive">
                     <table class="table">
                         <thead>

@@ -7,9 +7,9 @@ class Order {
     }
 
     // Create and store order
-    public function create($user_id, $total, $status) {
-        $stmt = $this->connection->prepare("INSERT INTO `order` (user_id, total, status) VALUES (?, ?, ?)");
-        $stmt->bind_param("ids", $user_id, $total, $status);
+    public function create($user_id, $store_id, $total, $quantity, $item_id, $status) {
+        $stmt = $this->connection->prepare("INSERT INTO `order` (user_id, store_id, total, quantity, product_id, status) VALUES (?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssss", $user_id, $store_id, $total, $quantity, $item_id, $status);
         return $stmt->execute();
     }
 
@@ -20,7 +20,12 @@ class Order {
         $stmt->execute();
         return $stmt->get_result()->fetch_assoc();
     }
-
+ // Find all products
+    public function all() {
+        $stmt = $this->connection->prepare("SELECT * FROM `order`");
+        $stmt->execute();
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC); // Fetch all rows as an associative array
+    }
     // Update order
     public function update($id, $status) {
         $stmt = $this->connection->prepare("UPDATE `order` SET status = ? WHERE id = ?");
