@@ -79,7 +79,7 @@ if(isset($_POST['create_product'])){
                                 <td><?php echo $item['name']; ?></td>
                                 <td><?php echo $item['brand']; ?></td>
                                 <td><?php echo $item['price']; ?></td>
-                                <td><?php echo $item['quantity']; ?></td>
+                                <td><?php echo $item['stock']; ?></td>
                                 <td><?php echo $item['description']; ?></td>
                             </tr>
                             <?php endforeach; ?>
